@@ -1,0 +1,18 @@
+# Mac OS X
+*.DS_Store
+
+# Editors
+*.sw[poj]
+*~
+
+/docs/_build
+/.tox
+/dist
+/build
+/rpm-build
+/*.egg-info
+*.py[c,o]
+.pytest_cache
+.coverage
+*,cover
+/test/integration/artifacts

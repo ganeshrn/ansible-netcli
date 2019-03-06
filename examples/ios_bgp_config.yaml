@@ -1,0 +1,71 @@
+    - name: IOS BGP test for automation
+      ios_bgp:
+        operation: merge
+        config:
+        - router_id: 192.168.1.1
+          bgp_as: 64496
+          log_neighbor_changes: True
+          neighbors:
+            - neighbor: 203.10.0.100
+              remote_as: 500
+              local_as: 64497
+              update_source: GigabitEthernet0/1
+              password: ansible
+              enabled: True
+              description: NBR_1
+              peer_group: peer1
+              ebgp_multihop: 200
+              timers:
+                keepalive: 300
+                holdtime: 360
+                min_neighbor_holdtime: 360
+
+            - neighbor: 192.168.1.100
+              remote_as: 64496
+
+            - neighbor: 203.10.0.101
+              remote_as: 501
+
+
+          networks:
+            - prefix: 10.0.0.0
+              mask: 255.255.0.0
+              route_map: RMAP_1
+
+
+          address_family:
+            - afi: ipv4
+              safi: multicast
+              auto_summary: True
+              neighbors:
+                - neighbor: 203.10.0.100
+                  activate: yes
+                  advertisement_interval: 120
+                  remove_private_as: True
+                  maximum_prefix: 57
+
+                - neighbor: 192.168.1.100
+                  route_reflector_client: True
+
+                - neighbor: 203.10.0.101
+                  route_server_client: True
+                  next_hop_self: True
+
+              networks:
+                - prefix: 182.168.2.0
+                  mask: 255.255.254.0
+                  route_map: RMAP_1
+                - prefix: 2.0.0.0
+                  mask: 255.255.0.0
+                  route_map: RMAP_2
+
+              redistribute:
+                - protocol: ospf
+                  id: 101
+                  metric: 112
+                  route_map: RMAP_1
+
+                - protocol: eigrp
+                  id: 112
+                  metric: 90
+                  route_map: RMAP_2

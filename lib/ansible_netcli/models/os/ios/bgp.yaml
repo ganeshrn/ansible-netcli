@@ -1,0 +1,485 @@
+---
+anm_version: 1.0
+anm_spec:
+  options:
+    bgp_as:
+      type: int
+      required: True
+      description:
+        - Specifies the BGP Autonomous System number to configure on the device
+      metadata:
+        command:
+          merge:
+            - "router bgp {{bgp_as}}"
+          delete:
+            - "no router bgp {{ bgp_as }}"
+          override:
+           - "no router bgp {{ bgp_as }}"
+           - "router bgp {{bgp_as}}"
+          replace:
+            - "no router bgp {{ bgp_as }}"
+            - "router bgp {{bgp_as}}"
+          index: "1"
+    router_id:
+      description:
+        - Configures the BGP routing process router-id value
+      metadata:
+        indent: 1
+        command:
+          merge:
+            - "bgp router-id {{ router_id }}"
+          delete:
+            - "no bgp router-id {{ router_id }}"
+          index: "2"
+    log_neighbor_changes:
+      type: bool
+      description:
+        - Enable/Disable logging neighbor up/down and reset reason
+      metadata:
+        indent: 1
+        command:
+          merge:
+            - bgp log-neighbor-changes
+          delete:
+            - no bgp log-neighbor-changes
+          index: "3"
+    networks:
+      type: list
+      elements: dict
+      description:
+          - Specify Networks to announce via BGP.
+          - For operation replace, this option is mutually exclusive with networks option under address_family.
+          - For operation replace, if the device already has an address family activated, this option is not allowed.
+      metadata:
+        indent: 1
+        command:
+          index: "4"
+        combine:
+          - "{{ __4_1 }} {{ __4_2 }} {{ __4_3 }}"
+      options:
+        prefix:
+          description:
+            - Network ID to announce via BGP.
+          required: True
+          metadata:
+            command:
+              merge: "network {{ prefix }}"
+              delete: "no network {{ prefix }}"
+              cmdref: True
+              index: "4_1"
+        mask:
+          description:
+            - Subnet mask for the network to announce.
+          metadata:
+            command:
+              merge: "mask {{ mask }}"
+              delete: "mask {{ mask }}"
+              cmdref: True
+              index: "4_2"
+        route_map:
+          description:
+            - Route map to modify the attributes.
+          metadata:
+            command:
+              merge: "route-map {{ route_map }}"
+              delete: "route-map {{ route_map }}"
+              cmdref: True
+              index: "4_3"
+    neighbors:
+      type: 'list'
+      elements: 'dict'
+      metadata:
+        command:
+          index: "5"
+      description:
+        - Specifies BGP neighbor related configurations.
+      options:
+        neighbor:
+          description:
+            - Neighbor router address.
+          required: True
+          metadata:
+            command:
+              merge: "neighbor {{ neighbor }}"
+              delete: "no neighbor {{ neighbor }}"
+              cmdref: True
+              index: "5_1"
+        remote_as:
+          description:
+            - Remote AS of the BGP neighbor to configure.
+          type: int
+          required: True
+          metadata:
+            indent: 1
+            command:
+              merge: "{{ __5_1 }} remote-as {{ remote_as }}"
+              delete: "{{ __5_1 }} remote-as {{ remote_as }}"
+              index: "5_2"
+        update_source:
+          description:
+            - Source of the routing updates.
+          metadata:
+            indent: 1
+            command:
+              merge: "{{ __5_1 }} update-source {{ update_source }}"
+              delete: "{{ __5_1 }} update-source {{ update_source }}"
+              index: "5_3"
+        password:
+          description:
+            - Password to authenticate BGP peer connection.
+          metadata:
+            indent: 1
+            command:
+              merge: "{{ __5_1 }} password {{ password }}"
+              delete: "{{ __5_1 }} password {{ password }}"
+              index: "5_4"
+        enabled:
+          description:
+            - Administratively shutdown or enable a neighbor.
+          type: bool
+          metadata:
+            indent: 1
+            command:
+              merge: "{% if enabled %}no {{ __5_1 }} shutdown{% else %}{{ __5_1 }} shutdown{% endif %}"
+              delete: "{{ __5_1 }} shutdown"
+              index: "5_5"
+        description:
+          description:
+            - Neighbor specific description.
+          metadata:
+            indent: 1
+            command:
+              merge: "{{ __5_1 }} description {{ description }}"
+              delete: "{{ __5_1 }} description {{ description }}"
+              index: "5_6"
+        ebgp_multihop:
+          description:
+            - Specifies the maximum hop count for EBGP neighbors not on directly connected networks.
+            - The range is from 0 to 255.
+          type: int
+          metadata:
+            indent: 1
+            command:
+              merge: "{{ __5_1 }} ebgp-multihop {{ ebgp_multihop }}"
+              delete: "{{ __5_1 }} ebgp-multihop {{ ebgp_multihop }}"
+              index: "5_9"
+        peer_group:
+          description:
+            - Name of the peer group that the neighbor is a member of.
+          metadata:
+            indent: 1
+            command:
+              merge: "{{ __5_1 }} peer-group {{ peer_group }}"
+              delete: "{{ __5_1 }} peer-group {{ peer_group }}"
+              index: "5_10"
+        timers:
+          type: 'dict'
+          description:
+            - Specifies BGP neighbor timer related configurations.
+          metadata:
+            indent: 1
+            command:
+              index: "5_11"
+            combine:
+              - "{{ __5_11_1 }} {{ __5_11_2 }} {{ __5_11_3 }}"
+          options:
+            keepalive:
+              description:
+                - Frequency (in seconds) with which the Cisco IOS software sends keepalive messages to its peer.
+                - The range is from 0 to 65535.
+              type: int
+              required: True
+              metadata:
+                command:
+                  merge: "{{ __5_1 }} timers {{ keepalive }}"
+                  delete: "no {{ __5_1 }} timers {{ keepalive }}"
+                  cmdref: True
+                  index: "5_11_1"
+            holdtime:
+              description:
+                - Interval (in seconds) after not receiving a keepalive message that the software declares a peer dead.
+                - The range is from 0 to 65535.
+              type: int
+              required: True
+              metadata:
+                command:
+                  merge: "{{ holdtime }}"
+                  delete: "{{ holdtime }}"
+                  cmdref: True
+                  index: "5_11_2"
+            min_neighbor_holdtime:
+              description:
+                - Interval (in seconds) specifying the minimum acceptable hold-time from a BGP neighbor.
+                - The minimum acceptable hold-time must be less than, or equal to, the interval specified in the holdtime argument.
+                - The range is from 0 to 65535.
+              type: int
+              metadata:
+                command:
+                  merge: "{{ min_neighbor_holdtime }}"
+                  delete: "{{ min_neighbor_holdtime }}"
+                  cmdref: True
+                  index: "5_11_3"
+        local_as:
+          description:
+            - The local AS number for the neighbor.
+          type: int
+          metadata:
+            command:
+              merge: "{{ __5_1 }} local-as {{ local_as }}"
+              delete: "no {{ __5_1 }} local-as {{ local_as }}"
+              index: "5_12"
+    address_family:
+      type: list
+      elements: dict
+      description:
+        - Specifies BGP address family related configurations
+      metadata:
+        #indent: 1
+        command:
+          exit: "exit-address-family"
+          index: "6"
+        combine:
+        - "{{ __6_1 }} {{ __6_2 }}"
+      options:
+        afi:
+          choices:
+            - ipv4
+            - ipv6
+          required: True
+          description:
+            - Type of address family to configure
+          metadata:
+            command:
+              merge: "address-family {{ afi }}"
+              delete: "no address-family {{ afi }}"
+              override: "no address-family {{ afi }}"
+              replace: "no address-family {{ afi }}"
+              index: "6_1"
+              cmdref: True
+        safi:
+          description:
+            - Specifies the type of cast for the address family
+          choices:
+            - flowspec
+            - unicast
+            - multicast
+            - labeled-unicast
+          default: unicast
+          metadata:
+            command:
+              merge: "{{ safi }}"
+              delete: "{{ safi }}"
+              index: "6_2"
+              cmdref: True
+        redistribute:
+          type: list
+          elements: dict
+          description:
+            - Specifies the redistribute information from another routing protocol.
+          metadata:
+            indent: 1
+            command:
+              index: "6_3"
+            combine:
+              - "{{ __6_3_1 }} {{ __6_3_2 }} {{ __6_3_3 }} {{ __6_3_4 }}"
+          options:
+            protocol:
+              description:
+                - Specifies the protocol for configuring redistribute information.
+              choices:
+                - ospf
+                - ospfv3
+                - eigrp
+                - isis
+                - static
+                - connected
+                - odr
+                - lisp
+                - mobile
+                - rip
+              required: True
+              metadata:
+                command:
+                  merge: "redistribute {{ protocol }}"
+                  delete: "no redistribute {{ protocol }}"
+                  index: "6_3_1"
+                  cmdref: True
+            id:
+              description:
+                - Identifier for the routing protocol for configuring redistribute information.
+                - Not valid for protocol - RIP.
+              metadata:
+                command:
+                  merge: "{{ id }}"
+                  delete: "{{ id }}"
+                  index: "6_3_2"
+                  cmdref: True
+            metric:
+              description:
+                - Specifies the metric for redistributed routes.
+              metadata:
+                command:
+                  merge: "metric {{ metric }}"
+                  delete: "metric {{ metric }}"
+                  index: "6_3_3"
+                  cmdref: True
+            route_map:
+              description:
+                - Specifies the route map reference.
+              metadata:
+                command:
+                  merge: "route-map {{ route_map }}"
+                  delete: "route-map {{ route_map }}"
+                  cmdref: True
+                  index: "6_3_4"
+        networks:
+          type: 'list'
+          elements: 'dict'
+          description:
+            - Specify networks to announce via BGP.
+          metadata:
+            indent: 1
+            command:
+              index: "6_4"
+            combine:
+              - "{{ __6_4_1 }} {{ __6_4_2 }} {{ __6_4_3 }}"
+          options:
+            prefix:
+              description:
+                - Network ID to announce via BGP.
+              required: True
+              metadata:
+                command:
+                  merge: "network {{ prefix }}"
+                  delete: "no network {{ prefix }}"
+                  index: "6_4_1"
+                  cmdref: True
+            mask:
+              description:
+                - Subnet mask for the network to announce.
+              metadata:
+                command:
+                  merge: "mask {{ mask }}"
+                  delete: "mask {{ mask }}"
+                  index: "6_4_2"
+                  cmdref: True
+            route_map:
+              description:
+                - Route map to modify the attributes.
+              metadata:
+                command:
+                  merge: "route {{ route_map }}"
+                  delete: "route {{ route_map }}"
+                  index: "6_4_3"
+                  cmdref: True
+        neighbors:
+          type: 'list'
+          elements: 'dict'
+          description:
+            - Specifies BGP neighbor related configurations.
+          metadata:
+            command:
+              index: "6_5"
+          options:
+            neighbor:
+              description:
+                - Neighbor router address.
+              required: True
+              metadata:
+                command:
+                  merge: "neighbor {{ neighbor }}"
+                  delete: "no neighbor {{ neighbor }}"
+                  index: "6_5_1"
+                  cmdref: True
+            advertisement_interval:
+              description:
+                - Minimum interval between sending BGP routing updates for this neighbor.
+              type: int
+              metadata:
+                indent: 1
+                command:
+                  merge: "{{ __6_5_1 }} advertisement-interval {{ advertisement_interval }}"
+                  delete: "{{ __6_5_1 }} advertisement-interval {{ advertisement_interval }}"
+                  index: "6_5_2"
+            route_reflector_client:
+              description:
+                - Specify a neighbor as a route reflector client.
+              type: bool
+              metadata:
+                indent: 1
+                command:
+                  merge: "{% if route_reflector_client %}{{ __6_5_1 }} route-reflector-client{% else %}no {{ __6_5_1 }} route-reflector-client{% endif %}"
+                  delete: "{{ __6_5_1 }} route-reflector-client"
+                  index: "6_5_3"
+            route_server_client:
+              description:
+                - Specify a neighbor as a route server client.
+              type: bool
+              metadata:
+                indent: 1
+                command:
+                  merge: "{% if route_server_client %}{{ __6_5_1 }} route-server-client{% else %}no {{ __6_5_1 }} route-server-client{% endif %}"
+                  delete: "{{ __6_5_1 }} route-server-client"
+                  index: "6_5_4"
+            activate:
+              description:
+                - Enable the address family for this neighbor.
+              type: bool
+              metadata:
+                indent: 1
+                command:
+                  merge: "{% if activate %}{{ __6_5_1 }} activate {% else %}no {{ __6_5_1 }} activate{% endif %}"
+                  delete: "{{ __6_5_1 }} activate"
+                  index: "6_5_5"
+            remove_private_as:
+              description:
+                - Remove the private AS number from outbound updates.
+              type: bool
+              metadata:
+                indent: 1
+                command:
+                  merge: "{% if remove_private_as %}{{ __6_5_1 }} remove-private-AS {% else %}no {{ __6_5_1 }} remove-private-AS{% endif %}"
+                  delete: "{{ __6_5_1 }} remove-private-AS"
+                  index: "6_5_6"
+            next_hop_self:
+              description:
+                - Enable/disable the next hop calculation for this neighbor.
+              type: bool
+              metadata:
+                command:
+                  index: "6_5_7"
+            next_hop_unchanged:
+              description:
+                - Enable/disable propagation of next hop unchanged for iBGP paths to this neighbor.
+              type: bool
+              metadata:
+                command:
+                  index: "6_5_8"
+            maximum_prefix:
+              description:
+                - Maximum number of prefixes to accept from this peer.
+                - The range is from 1 to 2147483647.
+              type: int
+              metadata:
+                indent: 1
+                command:
+                  merge: "{{ __6_5_1 }} maximum-prefix {{ maximum_prefix }}"
+                  delete: "{{ __6_5_1 }} maximum-prefix {{ maximum_prefix }}"
+                  index: "6_5_9"
+        auto_summary:
+          description:
+            - Enable automatic network number summarization.
+          type: bool
+          metadata:
+            indent: 1
+            command:
+              merge: "{% if auto_summary %}auto-summary{% else %}no auto-summary{% endif %}"
+              delte: "no auto-summary"
+              index: "6_6"
+        synchronization:
+          description:
+            - Enable IGP synchronization.
+          type: bool
+          metadata:
+            command:
+              index: "6_7"
