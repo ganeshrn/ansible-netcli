@@ -224,6 +224,7 @@ anm_spec:
             - The local AS number for the neighbor.
           type: int
           metadata:
+            indent: 1
             command:
               merge: "{{ __5_1 }} local-as {{ local_as }}"
               delete: "no {{ __5_1 }} local-as {{ local_as }}"
@@ -308,6 +309,7 @@ anm_spec:
               description:
                 - Identifier for the routing protocol for configuring redistribute information.
                 - Not valid for protocol - RIP.
+              type: int
               metadata:
                 command:
                   merge: "{{ id }}"
