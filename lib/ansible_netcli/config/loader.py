@@ -31,7 +31,8 @@ class Loader(object):
 
     def _handle_options(self, options, index=0):
         ordered_options = OrderedDict()
-        for count in range(len(options) + 1):
+
+        for count in range(len(options) + 2):
             for k, v in iteritems(options):
                 try:
                     option_index = str(v['metadata']['command']['index'])
